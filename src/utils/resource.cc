@@ -15,7 +15,7 @@ namespace Astroid {
     argv0 = _a;
   }
 
-  Resource::Resource (bool has_user, path def) {
+  Resource::Resource (bool has_user __attribute__ ((unused)), path def) {
     path prefix = path(PREFIX) / path ("share/astroid");
 
     path local_p = def;
@@ -26,6 +26,7 @@ namespace Astroid {
 
     path prefix_p = prefix / def;
 
+# ifndef ASTROID_WEBEXTENSION
     /* if this resource is user-configurable, check there first */
     path user_p = astroid->standard_paths ().config_dir / def;
 
@@ -45,6 +46,7 @@ namespace Astroid {
         return;
       }
     }
+#endif
 
 # ifdef DEBUG
     if (exists (local_p)) {

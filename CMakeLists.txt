@@ -355,6 +355,7 @@ add_library (
   src/modes/thread_view/webextension/tvextension.cc
   src/modes/thread_view/webextension/ae_protocol.cc
   src/modes/thread_view/webextension/dom_utils.cc
+  src/utils/resource.cc
   src/utils/ustring_utils.cc
   ${PROTO_SRC}
   ${PROTO_HDR}

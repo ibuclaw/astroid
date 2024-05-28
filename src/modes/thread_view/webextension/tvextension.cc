@@ -31,24 +31,71 @@
 # define LOG(x) BOOST_LOG_TRIVIAL(x)
 # define warn warning
 
+# include <boost/filesystem.hpp>
+
 # include "modes/thread_view/webextension/ae_protocol.hh"
 # include "modes/thread_view/webextension/dom_utils.hh"
+# include "utils/resource.hh"
 # include "utils/ustring_utils.hh"
 # include "messages.pb.h"
 
 namespace logging   = boost::log;
 namespace keywords  = boost::log::keywords;
 namespace expr      = boost::log::expressions;
+namespace bfs       = boost::filesystem;
 
 using namespace Astroid;
 
 extern "C" {/*{{{*/
 
 static void
+web_page_document_loaded_callback (WebKitWebPage *web_page,
+                                   gpointer       user_data)
+{
+  WebKitFrame *frame = webkit_web_page_get_main_frame (web_page);
+  JSCContext *jsc_context = webkit_frame_get_js_context (frame);
+
+  g_return_if_fail (jsc_context != NULL);
+
+  bfs::path thread_view = Resource (false, "ui/thread-view.js").get_path ();
+
+  gchar *content;
+  gsize length;
+  GError *error = NULL;
+  if (!g_file_get_contents (thread_view.c_str(), &content, &length, &error)) {
+    LOG (warning) << "failed to load '" << thread_view << "': "
+      << (error ? error->message : "Unknown error");
+    g_clear_error (&error);
+    return;
+  } 
+
+  gchar *resource_uri = g_strconcat ("resource:///", thread_view, NULL);
+  JSCValue *result =
+    jsc_context_evaluate_with_source_uri (jsc_context, content, length, resource_uri, 1);
+  g_free (resource_uri);
+
+  if (JSCException *exception = jsc_context_get_exception (jsc_context)) {
+    LOG (warning) << "failed to call script '" << thread_view << "': "
+      << jsc_exception_get_line_number (exception) << ":"
+      << jsc_exception_get_column_number (exception) << ": "
+      << jsc_exception_get_message (exception);
+
+    jsc_context_clear_exception (jsc_context);
+  }
+
+  g_clear_object (&result);
+  g_clear_object (&jsc_context);
+  g_free (content);
+}
+
+static void
 web_page_created_callback (WebKitWebExtension *extension,
                            WebKitWebPage      *web_page,
                            gpointer            user_data )
 {
+  g_signal_connect (web_page, "document-loaded",
+      G_CALLBACK (web_page_document_loaded_callback),
+      NULL);
 
   g_signal_connect (web_page, "send-request",
       G_CALLBACK (web_page_send_request),
