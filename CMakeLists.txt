@@ -53,7 +53,6 @@ endif ()
 # cmake -D...=ON|OFF command line feature switches and their default values
 #
 option (DISABLE_TERMINAL         "Disable embedded terminal (default = enabled)"                  OFF)
-option (DISABLE_EMBEDDED_EDITOR  "Disable embedded editor (default = enabled)"                    OFF)
 option (DISABLE_DOCS             "Disable generating docs (manpage) (default = enabled)"          OFF)
 option (ENABLE_PROFILING         "Enable profiling (default = disabled)"                          OFF)
 option (DISABLE_LIBSASS          "Disable libsass, requires a sassc compiler (default = enabled)" OFF)
@@ -426,26 +425,6 @@ if (NOT DISABLE_DOCS)
 else ()
   message (STATUS "Documentation generation (manpage) disabled.")
 endif ()
-
-##
-# embedded editor
-#
-if(DISABLE_EMBEDDED_EDITOR)
-  add_definitions ( -DDISABLE_EMBEDDED )
-  message (STATUS "Disabling embedded editor.")
-else(DISABLE_EMBEDDED_EDITOR)
-  if (APPLE)
-    message (WARNING "Embedded editor cannot be built on macOS; disabling embedded editor.")
-    add_definitions ( -DDISABLE_EMBEDDED )
-  else(APPLE)
-    target_sources (
-      hypocycloid
-      PRIVATE
-      src/modes/editor/editor.cc
-      src/modes/editor/plugin.cc
-      )
-  endif(APPLE)
-endif(DISABLE_EMBEDDED_EDITOR)
 
 ##
 # Installing stuff

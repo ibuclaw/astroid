@@ -15,7 +15,6 @@
 # include "config.hh"
 # include "mode.hh"
 # include "editor/editor.hh"
-# include "editor/plugin.hh"
 # include "editor/external.hh"
 # include "compose_message.hh"
 # include "account_manager.hh"
@@ -24,9 +23,6 @@
 namespace Astroid {
   class EditMessage : public Mode {
     friend Editor;
-# ifndef DISABLE_EMBEDDED
-    friend Plugin;
-# endif
     friend External;
 
     public:
@@ -52,12 +48,6 @@ namespace Astroid {
       Gtk::Revealer *encryption_revealer;
 
       bool gpgenabled;
-
-# ifndef DISABLE_EMBEDDED
-      bool embed_editor = true;
-# else
-      const bool embed_editor = false;
-# endif
 
       Editor * editor;
       bool editor_active = false;

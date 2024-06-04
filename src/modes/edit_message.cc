@@ -27,7 +27,6 @@
 # include "utils/gmime/gmime-compat.h"
 # include "actions/onmessage.hh"
 
-# include "editor/plugin.hh"
 # include "editor/external.hh"
 
 using namespace std;
@@ -165,9 +164,6 @@ namespace Astroid {
     editor_config = astroid->config ("editor");
     in_read = false;
 
-# ifndef DISABLE_EMBEDDED
-    embed_editor = !editor_config.get<bool> ("external_editor");
-# endif
     save_draft_on_force_quit = editor_config.get <bool> ("save_draft_on_force_quit");
 
     ustring attachment_words_s = editor_config.get<string> ("attachment_words");
@@ -260,19 +256,7 @@ namespace Astroid {
 
     make_tmpfile ();
 
-# ifndef DISABLE_EMBEDDED
-    if (embed_editor) {
-      editor = new Plugin (this, _mid);
-
-      //editor_rev->add (*editor_socket);
-      editor_box->pack_start (dynamic_cast<Plugin *> (editor)->bin, false, false, 2);
-
-    } else {
-# endif
-      editor = new External (this);
-# ifndef DISABLE_EMBEDDED
-    }
-# endif
+    editor = new External (this);
 
     thread_view = Gtk::manage(new ThreadView(main_window, true));
     //thread_rev->add (*thread_view);
@@ -318,12 +302,10 @@ namespace Astroid {
 
     sending_in_progress.store (false);
 
-    if (!embed_editor) {
-      thread_view->show ();
-      gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(thread_view->gobj ()), true, true, 5, GTK_PACK_START);
-      grab_modal ();
-      thread_view->grab_focus ();
-    }
+    thread_view->show ();
+    gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(thread_view->gobj ()), true, true, 5, GTK_PACK_START);
+    grab_modal ();
+    thread_view->grab_focus ();
 
     editor_toggle (false);
 
@@ -585,12 +567,7 @@ namespace Astroid {
   } // }}}
 
   void EditMessage::edit_when_ready () {
-    if (!embed_editor) {
-       editor_toggle (true);
-    } else {
-      if (!editor->ready ()) editor->start_editor_when_ready = true;
-      else editor_toggle (true);
-    }
+    editor_toggle (true);
   }
 
   EditMessage::~EditMessage () {
@@ -932,90 +909,27 @@ namespace Astroid {
   void EditMessage::editor_toggle (bool on) {
     LOG (debug) << "em: editor toggle: " << on;
 
-# ifndef DISABLE_EMBEDDED
-    if (embed_editor) {
-      if (on) {
-        prepare_message ();
+    if (on && !editor->started ()) {
+      /* start editor */
+      editor_active = true;
 
-        editor_active = true;
+      prepare_message ();
+      read_edited_message ();
 
-        /*
-        editor_rev->set_reveal_child (true);
-        thread_rev->set_reveal_child (false);
-        */
+      editor->start ();
 
-        dynamic_cast<Plugin *> (editor)->bin.show ();
-        thread_view->hide ();
-
-        gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(dynamic_cast<Plugin *> (editor)->bin.gobj ()), true, true, 5, GTK_PACK_START);
-        gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(thread_view->gobj ()), false, false, 5, GTK_PACK_START);
-
-        /* future Gtk
-        editor_box->set_child_packing (editor_rev, true, true, 2);
-        editor_box->set_child_packing (thread_rev, false, false, 2);
-        */
-
-        fields_hide ();
-
-        editor->start ();
-
-      } else {
-        if (editor->started ()) {
-          editor->stop ();
-        }
-
-        /*
-        editor_rev->set_reveal_child (false);
-        thread_rev->set_reveal_child (true);
-        */
-        dynamic_cast<Plugin *> (editor)->bin.hide ();
-        thread_view->show ();
-
-        gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(dynamic_cast<Plugin *>(editor)->bin.gobj ()), false, false, 5, GTK_PACK_START);
-        gtk_box_set_child_packing (editor_box->gobj (), GTK_WIDGET(thread_view->gobj ()), true, true, 5, GTK_PACK_START);
-
-        /* future Gtk
-        editor_box->set_child_packing (editor_rev, false, false, 2);
-        editor_box->set_child_packing (thread_rev, true, true, 2);
-        */
-
-        fields_show ();
-
-        if (editor_active)
-          read_edited_message ();
-
-        editor_active = false;
-
-        grab_modal ();
-        thread_view->grab_focus ();
-      }
+      info_str = "Editing..";
 
     } else {
-# endif
-      if (on && !editor->started ()) {
-        /* start editor */
-        editor_active = true;
+      /* return from editor */
+      set_info ("");
 
-        prepare_message ();
+      if (editor_active) {
         read_edited_message ();
-
-        editor->start ();
-
-        info_str = "Editing..";
-
-      } else {
-        /* return from editor */
-        set_info ("");
-
-        if (editor_active) {
-          read_edited_message ();
-        }
-
-        editor_active = false;
       }
-# ifndef DISABLE_EMBEDDED
+
+      editor_active = false;
     }
-# endif
   }
 
   void EditMessage::activate_editor () {
@@ -1388,7 +1302,7 @@ namespace Astroid {
   }
 
   void EditMessage::grab_modal () {
-    if (!embed_editor || !editor_active) add_modal_grab ();
+    add_modal_grab ();
   }
 
   void EditMessage::release_modal () {
