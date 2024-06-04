@@ -19,9 +19,6 @@
 # include "db.hh"
 # include "utils/utils.hh"
 # include "crypto.hh"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 using namespace std;
 using boost::property_tree::ptree;
@@ -355,19 +352,11 @@ namespace Astroid {
       bg.set_grey_p (1.);
     }
 
-    /* first try plugin */
-# ifndef DISABLE_PLUGINS
-    if (!thread_index->plugins->format_tags (tags, bg.to_string (), (flags & Gtk::CELL_RENDERER_SELECTED) != 0, tag_string)) {
-# endif
+    unsigned char cv[3] = { (unsigned char) bg.get_red (),
+                            (unsigned char) bg.get_green (),
+                            (unsigned char) bg.get_blue () };
 
-      unsigned char cv[3] = { (unsigned char) bg.get_red (),
-                              (unsigned char) bg.get_green (),
-                              (unsigned char) bg.get_blue () };
-
-      tag_string = VectorUtils::concat_tags_color (tags, true, tags_len, cv);
-# ifndef DISABLE_PLUGINS
-    }
-# endif
+    tag_string = VectorUtils::concat_tags_color (tags, true, tags_len, cv);
 
     pango_layout->set_markup (tag_string);
 

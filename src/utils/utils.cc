@@ -9,9 +9,6 @@
 # include <glib.h>
 # include <boost/property_tree/ptree.hpp>
 # include <boost/filesystem.hpp>
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 namespace bfs = boost::filesystem;
 using boost::property_tree::ptree;
@@ -108,20 +105,6 @@ namespace Astroid {
 
   std::pair<Gdk::RGBA, Gdk::RGBA> Utils::get_tag_color_rgba (ustring t, unsigned char cv[3])
   {
-    # ifndef DISABLE_PLUGINS
-
-    Gdk::RGBA canvas;
-    canvas.set_red_u   ( cv[0] * 65535 / 255 );
-    canvas.set_green_u ( cv[1] * 65535 / 255 );
-    canvas.set_blue_u  ( cv[2] * 65535 / 255 );
-
-    auto clrs = astroid->plugin_manager->astroid_extension->get_tag_colors (t, rgba_to_hex (canvas));
-
-    if (!clrs.first.empty () || !clrs.second.empty ()) {
-      return std::make_pair (Gdk::RGBA (clrs.first), Gdk::RGBA (clrs.second));
-    }
-    # endif
-
     auto     _tc = Crypto::get_md5_digest_b (t);
     gsize    len;
     guint8 * tc  = (guint8 *) _tc->get_data (len);

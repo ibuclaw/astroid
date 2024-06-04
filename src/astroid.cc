@@ -37,10 +37,6 @@
 # include "utils/utils.hh"
 # include "utils/resource.hh"
 
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
-
 # include "poll.hh"
 
 /* UI */
@@ -132,11 +128,7 @@ namespace Astroid {
       ( "start-polling",  "indicate that external polling (external notmuch db R/W operations) starts")
       ( "stop-polling",   "indicate that external polling stops")
       ( "refresh", po::value<unsigned long>(), "refresh messages changed since lastmod")
-# ifndef DISABLE_PLUGINS
-      ( "disable-plugins", "disable plugins");
-# else
       ;
-# endif
 
       /* default option (without --<option> prefix) */
     pdesc.add("mailto", -1);
@@ -307,13 +299,6 @@ namespace Astroid {
       /* set up accounts */
       accounts = new AccountManager ();
 
-# ifndef DISABLE_PLUGINS
-      /* set up plugins */
-      bool disable_plugins = vm.count ("disable-plugins");
-      plugin_manager = new PluginManager (disable_plugins, in_test ());
-      plugin_manager->astroid_extension = new PluginManager::AstroidExtension (this);
-# endif
-
       /* set up global actions */
       actions = new ActionManager ();
 
@@ -372,12 +357,6 @@ namespace Astroid {
     /* set up accounts */
     accounts = new AccountManager ();
 
-# ifndef DISABLE_PLUGINS
-    /* set up plugins */
-    plugin_manager = new PluginManager (false, true);
-    plugin_manager->astroid_extension = new PluginManager::AstroidExtension (this);
-# endif
-
     /* set up contacts */
     //contacts = new Contacts ();
 
@@ -400,11 +379,6 @@ namespace Astroid {
 
     if (actions) actions->close ();
     SavedSearches::destruct ();
-
-# ifndef DISABLE_PLUGINS
-    if (plugin_manager && plugin_manager->astroid_extension) delete plugin_manager->astroid_extension;
-    if (plugin_manager) delete plugin_manager;
-# endif
 
     LOG (info) << "astroid: goodbye!";
   }
@@ -522,17 +496,6 @@ namespace Astroid {
         mw->add_mode (s);
       }
 
-# ifndef DISABLE_PLUGINS
-      auto queries = plugin_manager->astroid_extension->get_queries ();
-      LOG (info) << "extension queries: " << queries.size();
-      if (queries.size() > 0) {
-        for (auto query : queries) {
-          Mode * ti = new ThreadIndex(mw, query.second, query.first);
-          ti->invincible = true;
-          mw->add_mode(ti);
-        }
-      } else {
-# endif
       ptree qpt = config ("startup.queries");
 
       for (const auto &kv : qpt) {
@@ -544,9 +507,6 @@ namespace Astroid {
         ti->invincible = true; // set startup queries to be invincible
         mw->add_mode (ti);
       }
-# ifndef DISABLE_PLUGINS
-      }
-# endif
 
       mw->set_active (0);
     }

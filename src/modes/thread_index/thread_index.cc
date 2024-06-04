@@ -16,9 +16,6 @@
 # include "modes/thread_view/thread_view.hh"
 # include "modes/saved_searches.hh"
 # include "main_window.hh"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 using namespace std;
 
@@ -51,10 +48,6 @@ namespace Astroid {
         sigc::mem_fun (this, &ThreadIndex::on_first_thread_ready));
 
     queryloader.start (query_string);
-
-# ifndef DISABLE_PLUGINS
-    plugins = new PluginManager::ThreadIndexExtension (this);
-# endif
 
     set_label (get_label ());
 
@@ -313,10 +306,6 @@ namespace Astroid {
   void ThreadIndex::pre_close () {
     queryloader.stop (true);
     if (packed > 1) del_pane (1);
-# ifndef DISABLE_PLUGINS
-    plugins->deactivate ();
-    delete plugins;
-# endif
   }
 
   ThreadIndex::~ThreadIndex () {

@@ -30,9 +30,6 @@
 # include "utils/gravatar.hh"
 # include "utils/cmd.hh"
 # include "utils/gmime/gmime-compat.h"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 # include "actions/action.hh"
 # include "actions/cmdaction.hh"
 # include "actions/tag_action.hh"
@@ -133,12 +130,6 @@ namespace Astroid {
 
     show_all ();
     show_all_children ();
-
-# ifndef DISABLE_PLUGINS
-    /* load plugins */
-    plugins = new PluginManager::ThreadViewExtension (this);
-# endif
-
   }
 
   ThreadView::~ThreadView () { //
@@ -149,11 +140,6 @@ namespace Astroid {
   }
 
   void ThreadView::pre_close () {
-# ifndef DISABLE_PLUGINS
-    plugins->deactivate ();
-    delete plugins;
-# endif
-
     delete page_client;
   }
 

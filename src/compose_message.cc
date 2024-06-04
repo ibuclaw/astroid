@@ -25,9 +25,6 @@
 # include "actions/onmessage.hh"
 # include "utils/address.hh"
 # include "utils/ustring_utils.hh"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 using namespace std;
 namespace bfs = boost::filesystem;
@@ -118,7 +115,7 @@ namespace Astroid {
       sf << s.rdbuf ();
       s.close ();
       if (account->signature_separate) {
-	text_body_content += "-- \n";
+        text_body_content += "-- \n";
       }
       text_body_content += sf.str ();
     }
@@ -293,17 +290,11 @@ namespace Astroid {
     /* set user agent */
     ustring ua = "";
 
-# ifndef DISABLE_PLUGINS
-    if (!astroid->plugin_manager->astroid_extension->get_user_agent (ua)) {
-# endif
+    ua = astroid->config ().get<string> ("mail.user_agent");
+    UstringUtils::trim (ua);
 
-      ua = astroid->config ().get<string> ("mail.user_agent");
-      UstringUtils::trim (ua);
-
-      if (ua == "default") ua = astroid->user_agent;
-# ifndef DISABLE_PLUGINS
-    }
-# endif
+    if (ua == "default")
+      ua = astroid->user_agent;
 
     if (!ua.empty ()) {
       g_mime_object_set_header (GMIME_OBJECT(message), "User-Agent", ua.c_str(), NULL);

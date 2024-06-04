@@ -17,9 +17,6 @@
 # include "utils/ustring_utils.hh"
 # include "utils/vector_utils.hh"
 # include "actions/action_manager.hh"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 using namespace std;
 using namespace boost::filesystem;
@@ -192,11 +189,6 @@ namespace Astroid {
 
     } else {
       GMimeStream * stream = NULL;
-# ifndef DISABLE_PLUGINS
-      if (process) {
-        stream = astroid->plugin_manager->astroid_extension->process (fname.c_str());
-      }
-# endif
       if (stream == NULL) {
         GError *err = NULL; (void) (err); // not used in GMime 2.
         stream  = g_mime_stream_file_open (fname.c_str(), "r", &err);

@@ -18,9 +18,6 @@
 # include "modes/mode.hh"
 # include "message_thread.hh"
 # include "theme.hh"
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
 
 using boost::property_tree::ptree;
 
@@ -65,10 +62,6 @@ namespace Astroid {
       bool    expand_flagged;
 
       Theme theme;
-
-# ifndef DISABLE_PLUGINS
-      PluginManager::ThreadViewExtension * plugins;
-# endif
 
       ustring open_external_link;
       void    open_link (ustring);

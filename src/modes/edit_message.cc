@@ -210,55 +210,47 @@ namespace Astroid {
     ustring _mid = "";
     msg_time = time(0);
 
-# ifndef DISABLE_PLUGINS
-    if (!astroid->plugin_manager->astroid_extension->generate_mid (_mid)) {
-# endif
+    char _hostname[1024];
+    _hostname[1023] = 0;
+    gethostname (_hostname, 1023);
 
-      char _hostname[1024];
-      _hostname[1023] = 0;
-      gethostname (_hostname, 1023);
-
-      char _domainname[1024];
-      _domainname[1023] = 0;
-      if (getdomainname (_domainname, 1023) < 0) {
-        *_domainname = '\0';
-      }
-
-      ustring hostname = astroid->config ().get <string> ("mail.message_id_fqdn");
-      UstringUtils::trim (hostname);
-      if (hostname.empty ()) {
-        if (*_hostname != 0) {
-          hostname = _hostname;
-
-          if (*_domainname != 0) {
-            ustring d (_domainname);
-            d = UstringUtils::replace (d, "(", ""); // often (none) is returned
-            d = UstringUtils::replace (d, ")", "");
-            hostname += ".";
-            hostname += d;
-          }
-
-          if (hostname.find (".", 0) == std::string::npos) {
-            /* add a top level domain */
-            hostname += ".none";
-          }
-        } else {
-          hostname = UstringUtils::random_alphanumeric (10) + ".none";
-        }
-      }
-
-
-      ustring user = astroid->config ().get<string> ("mail.message_id_user");
-      UstringUtils::trim (user);
-      if (user.empty ()) user = "astroid";
-
-      _mid = UstringUtils::random_alphanumeric (10);
-
-      _mid = ustring::compose ("%1.%2.%3@%4", msg_time, _mid, user, hostname);
-
-# ifndef DISABLE_PLUGINS
+    char _domainname[1024];
+    _domainname[1023] = 0;
+    if (getdomainname (_domainname, 1023) < 0) {
+      *_domainname = '\0';
     }
-# endif
+
+    ustring hostname = astroid->config ().get <string> ("mail.message_id_fqdn");
+    UstringUtils::trim (hostname);
+    if (hostname.empty ()) {
+      if (*_hostname != 0) {
+        hostname = _hostname;
+
+        if (*_domainname != 0) {
+          ustring d (_domainname);
+          d = UstringUtils::replace (d, "(", ""); // often (none) is returned
+          d = UstringUtils::replace (d, ")", "");
+          hostname += ".";
+          hostname += d;
+        }
+
+        if (hostname.find (".", 0) == std::string::npos) {
+          /* add a top level domain */
+          hostname += ".none";
+        }
+      } else {
+        hostname = UstringUtils::random_alphanumeric (10) + ".none";
+      }
+    }
+
+
+    ustring user = astroid->config ().get<string> ("mail.message_id_user");
+    UstringUtils::trim (user);
+    if (user.empty ()) user = "astroid";
+
+    _mid = UstringUtils::random_alphanumeric (10);
+
+    _mid = ustring::compose ("%1.%2.%3@%4", msg_time, _mid, user, hostname);
 
     if (msg_id == "") {
       msg_id = _mid;

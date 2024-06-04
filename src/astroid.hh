@@ -69,10 +69,6 @@ namespace Astroid {
       /* actions */
       ActionManager * actions = NULL;
 
-# ifndef DISABLE_PLUGINS
-      PluginManager * plugin_manager = NULL;
-# endif
-
       /* poll */
       Poll * poll = NULL;
 

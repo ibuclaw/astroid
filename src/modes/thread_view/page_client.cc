@@ -30,10 +30,6 @@
 # include "utils/ustring_utils.hh"
 # include "utils/gravatar.hh"
 
-# ifndef DISABLE_PLUGINS
-  # include "plugin/manager.hh"
-# endif
-
 using namespace boost::filesystem;
 
 namespace Astroid {
@@ -206,17 +202,6 @@ namespace Astroid {
     if (enable_gravatar) {
       s.add_allowed_uris ("https://www.gravatar.com/avatar/");
     }
-
-# ifndef DISABLE_PLUGINS
-    /* get plugin allowed uris */
-    std::vector<ustring> puris = thread_view->plugins->get_allowed_uris ();
-    if (puris.size() > 0) {
-      LOG (debug) << "pc: plugin allowed uris: " << VectorUtils::concat_tags (puris);
-      for (auto &p : puris) {
-        s.add_allowed_uris (p);
-      }
-    }
-# endif
 
     AeProtocol::send_message_sync (AeProtocol::MessageTypes::Page, s, ostream, m_ostream, istream, m_istream);
   }
@@ -427,15 +412,7 @@ namespace Astroid {
         tag = Glib::Markup::escape_text (tag);
       }
 
-# ifndef DISABLE_PLUGINS
-      if (!thread_view->plugins->format_tags (tags, "#ffffff", false, tags_s)) {
-#  endif
-
-        tags_s = VectorUtils::concat_tags_color (tags, false, 0, cv);
-
-# ifndef DISABLE_PLUGINS
-      }
-# endif
+      tags_s = VectorUtils::concat_tags_color (tags, false, 0, cv);
 
       msg.set_tag_string (tags_s);
 
@@ -448,16 +425,8 @@ namespace Astroid {
     {
       ustring uri = "";
       auto se = Address(m->sender);
-# ifdef DISABLE_PLUGINS
-      if (false) {
-# else
-      if (thread_view->plugins->get_avatar_uri (se.email (), Gravatar::DefaultStr[Gravatar::Default::RETRO], 48, m, uri)) {
-# endif
-        ; // all fine, use plugins avatar
-      } else {
-        if (enable_gravatar) {
-          uri = Gravatar::get_image_uri (se.email (),Gravatar::Default::RETRO , 48);
-        }
+      if (enable_gravatar) {
+        uri = Gravatar::get_image_uri (se.email (),Gravatar::Default::RETRO , 48);
       }
 
       msg.set_gravatar (uri);
@@ -737,18 +706,7 @@ namespace Astroid {
     }
 
     if (c->viewable) {
-# ifndef DISABLE_PLUGINS
-
-      part->set_content (
-          thread_view->plugins->filter_part (
-            c->viewable_text (false, true),
-            c->viewable_text (true, true),
-            mime_type,
-            m->is_patch()));
-
-# else
       part->set_content (c->viewable_text (true, true));
-# endif
     }
 
     /* Check if we are preferred part or sibling.
