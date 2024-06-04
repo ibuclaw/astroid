@@ -7,9 +7,6 @@
 # include <gtkmm/window.h>
 # include <gtkmm/notebook.h>
 
-# ifndef DISABLE_VTE
-# include <vte/vte.h>
-# endif
 # include <boost/filesystem.hpp>
 
 # include "proto.hh"
@@ -19,16 +16,6 @@
 # include "actions/action_manager.hh"
 
 namespace bfs = boost::filesystem;
-
-# ifndef DISABLE_VTE
-extern "C" {
-  void mw_on_terminal_child_exit (VteTerminal *, gint, gpointer);
-  void mw_on_terminal_commit (VteTerminal *, gchar **, guint, gpointer);
-# if VTE_CHECK_VERSION(0,48,0)
-  void mw_on_terminal_spawn_callback (VteTerminal *, GPid pid, GError *, gpointer);
-# endif
-}
-# endif
 
 namespace Astroid {
   class Notebook : public Gtk::Notebook {
@@ -65,9 +52,6 @@ namespace Astroid {
       typedef enum _active {
         Window,
         Command,
-# ifndef DISABLE_VTE
-        Terminal,
-# endif
       } Active;
 
       /* command bar */
@@ -80,22 +64,6 @@ namespace Astroid {
           std::function<void(ustring)>);
       void disable_command ();
       void on_command_mode_changed ();
-
-      /* terminal */
-# ifndef DISABLE_VTE
-      GPid      terminal_pid;
-      bfs::path terminal_cwd;
-
-      void enable_terminal ();
-      void disable_terminal ();
-      void on_terminal_child_exit (VteTerminal *, gint);
-      void on_terminal_commit (VteTerminal *, gchar **, guint);
-      void on_terminal_spawn_callback (VteTerminal *, GPid, GError *);
-
-    private:
-      Gtk::Revealer * rev_terminal;
-      GtkWidget *     vte_term;
-# endif
 
     public:
       /* actions */

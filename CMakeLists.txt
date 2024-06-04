@@ -52,7 +52,6 @@ endif ()
 ##
 # cmake -D...=ON|OFF command line feature switches and their default values
 #
-option (DISABLE_TERMINAL         "Disable embedded terminal (default = enabled)"                  OFF)
 option (DISABLE_DOCS             "Disable generating docs (manpage) (default = enabled)"          OFF)
 option (ENABLE_PROFILING         "Enable profiling (default = disabled)"                          OFF)
 option (DISABLE_LIBSASS          "Disable libsass, requires a sassc compiler (default = enabled)" OFF)
@@ -126,15 +125,6 @@ if(APPLE)
   set ( Gettext_LDFLAGS "-L/usr/local/opt/gettext/lib" )
 endif(APPLE)
 
-pkg_check_modules (VTE2 vte-2.91)
-if(DISABLE_TERMINAL OR ( NOT VTE2_FOUND ))
-  add_definitions ( -DDISABLE_VTE )
-  if(NOT VTE2_FOUND)
-    message (WARNING "Vte library not found.")
-  endif()
-  message (STATUS "Disabling embedded terminal.")
-endif()
-
 ##
 # compile flags and options
 #
@@ -148,7 +138,6 @@ include_directories (
   ${GIOUNIX_INCLUDE_DIRS}
   ${GMIME_INCLUDE_DIRS}
   ${WEBKIT2GTK_INCLUDE_DIRS}
-  ${VTE2_INCLUDE_DIRS}
   ${SASS_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${PROTOBUF_INCLUDE_DIRS}
@@ -162,7 +151,6 @@ add_compile_options (
   ${GIOUNIX_CFLAGS}
   ${GMIME_CFLAGS}
   ${WEBKIT2GTK_CFLAGS}
-  ${VTE2_CFLAGS}
   ${SASS_CFLAGS}
   )
 
@@ -330,7 +318,6 @@ target_link_libraries (
   ${GIOMM2_LDFLAGS}
   ${GIOUNIX_LDFLAGS}
   ${GMIME_LDFLAGS}
-  ${VTE2_LDFLAGS}
   ${SASS_LDFLAGS}
   ${Boost_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}

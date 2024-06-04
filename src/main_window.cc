@@ -6,10 +6,6 @@
 # include <pangomm/fontdescription.h>
 # include <pango/pango.h>
 
-# ifndef DISABLE_VTE
-# include <vte/vte.h>
-# endif
-
 # include <boost/filesystem.hpp>
 
 # include "astroid.hh"
@@ -28,25 +24,6 @@
 
 using namespace std;
 namespace bfs = boost::filesystem;
-
-# ifndef DISABLE_VTE
-extern "C" {
-  void mw_on_terminal_child_exit (VteTerminal * t, gint a, gpointer mw) {
-    ((Astroid::MainWindow *) mw)->on_terminal_child_exit (t, a);
-  }
-
-  void mw_on_terminal_commit (VteTerminal * t, gchar ** tx, guint sz, gpointer mw) {
-    ((Astroid::MainWindow *) mw)->on_terminal_commit (t, tx, sz);
-  }
-
-# if VTE_CHECK_VERSION(0,48,0)
-  void mw_on_terminal_spawn_callback (VteTerminal * t, GPid pid, GError * err, gpointer mw)
-  {
-    ((Astroid::MainWindow *) mw)->on_terminal_spawn_callback (t, pid, err);
-  }
-# endif
-}
-# endif
 
 namespace Astroid {
   atomic<uint> MainWindow::nextid (0);
@@ -172,16 +149,6 @@ namespace Astroid {
     rev_multi->add (*rh_);
     rev_multi->set_reveal_child (false);
     vbox.pack_end (*rev_multi, false, true, 0);
-
-    /* terminal */
-# ifndef DISABLE_VTE
-    rev_terminal = Gtk::manage (new Gtk::Revealer ());
-    rev_terminal->set_transition_type (Gtk::REVEALER_TRANSITION_TYPE_SLIDE_UP);
-    rev_terminal->set_reveal_child (false);
-    vbox.pack_end (*rev_terminal, false, true, 0);
-
-    terminal_cwd = bfs::current_path ();
-# endif
 
     add (vbox);
 
@@ -426,15 +393,6 @@ namespace Astroid {
           return true;
         });
 
-# ifndef DISABLE_VTE
-    keys.register_key ("|", "main_window.open_terminal",
-        "Open terminal",
-        [&] (Key) {
-          enable_terminal ();
-          return true;
-        });
-# endif
-
     // }}}
   }
 
@@ -506,129 +464,6 @@ namespace Astroid {
       disable_command ();
     }
   }
-
-  /* Terminal {{{ */
-# ifndef DISABLE_VTE
-  void MainWindow::enable_terminal () {
-    rev_terminal->set_reveal_child (true);
-    ungrab_active ();
-    active_mode = Terminal;
-
-    vte_term = vte_terminal_new ();
-    gtk_container_add (GTK_CONTAINER(rev_terminal->gobj ()), vte_term);
-    rev_terminal->show_all ();
-
-    /* load font settings */
-    ustring font_desc_string = astroid->config("terminal").get<string> ("font_description");
-
-    if (font_desc_string == "" || font_desc_string == "default") {
-      auto settings = Gio::Settings::create ("org.gnome.desktop.interface");
-      font_desc_string = settings->get_string ("monospace-font-name");
-    }
-
-    auto font_description = Pango::FontDescription (font_desc_string);
-
-    /* https://developer.gnome.org/pangomm/stable/classPango_1_1FontDescription.html#details */
-    if (font_description.get_size () == 0) {
-      LOG (warn) << "terminal.font_description: no size specified, expect weird behaviour.";
-    }
-
-    vte_terminal_set_font (VTE_TERMINAL(vte_term), font_description.gobj ());
-    vte_terminal_set_size (VTE_TERMINAL (vte_term), 1, astroid->config("terminal").get<int> ("height"));
-
-    /* start shell */
-    char * shell = vte_get_user_shell ();
-
-    char * args[2] = { shell, NULL };
-    char * envs[1] = { NULL };
-
-    LOG (info) << "mw: starting terminal..: " << shell;
-
-    if (!bfs::exists (terminal_cwd)) {
-      terminal_cwd = bfs::current_path ();
-    }
-
-# if VTE_CHECK_VERSION(0,48,0)
-    vte_terminal_spawn_async (VTE_TERMINAL(vte_term),
-        VTE_PTY_DEFAULT,
-        terminal_cwd.c_str(),
-        args,
-        envs,
-        G_SPAWN_DEFAULT,
-        NULL,
-        NULL,
-        NULL,
-        -1,
-        NULL,
-        mw_on_terminal_spawn_callback,
-        this);
-# else
-    GError * err = NULL;
-    vte_terminal_spawn_sync (VTE_TERMINAL(vte_term),
-        VTE_PTY_DEFAULT,
-        terminal_cwd.c_str(),
-        args,
-        envs,
-        G_SPAWN_DEFAULT,
-        NULL,
-        NULL,
-        &terminal_pid,
-        NULL,
-        (err = NULL, &err));
-
-    on_terminal_spawn_callback (VTE_TERMINAL(vte_term), terminal_pid, err);
-
-# endif
-
-    gtk_widget_grab_focus (vte_term);
-    gtk_grab_add (vte_term);
-  }
-
-  void MainWindow::on_terminal_spawn_callback (VteTerminal * vte_term, GPid pid, GError * err)
-  {
-    if (err) {
-      LOG (error) << "mw: terminal: " << err->message;
-      disable_terminal ();
-    } else {
-      terminal_pid = pid;
-
-      LOG (debug) << "mw: terminal started: " << terminal_pid;
-      g_signal_connect (vte_term, "child-exited",
-          G_CALLBACK (mw_on_terminal_child_exit),
-          (gpointer) this);
-
-      g_signal_connect (vte_term, "commit",
-          G_CALLBACK (mw_on_terminal_commit),
-          (gpointer) this);
-
-    }
-  }
-
-  void MainWindow::disable_terminal () {
-    LOG (info) << "mw: disabling terminal..";
-    rev_terminal->set_reveal_child (false);
-    set_active (current);
-    active_mode = Window;
-    gtk_grab_remove (vte_term);
-
-    gtk_widget_destroy (vte_term);
-  }
-
-  void MainWindow::on_terminal_child_exit (VteTerminal *, gint) {
-    LOG (info) << "mw: terminal exited (cwd: " << terminal_cwd.c_str () << ")";
-    disable_terminal ();
-  }
-
-  void MainWindow::on_terminal_commit (VteTerminal *, gchar **, guint) {
-    bfs::path pth = bfs::path(ustring::compose ("/proc/%1/cwd", terminal_pid).c_str ());
-
-    if (bfs::exists (pth)) {
-      terminal_cwd = bfs::canonical (pth);
-    }
-  }
-# endif
-
-  // }}}
 
   void MainWindow::quit () {
     LOG (info) << "mw: quit: " << id;
@@ -704,14 +539,7 @@ namespace Astroid {
       }
 
       return true; // swallow all keys
-
-# ifndef DISABLE_VTE
-    } else if (active_mode == Terminal) {
-      return true;
     }
-# else
-    }
-# endif
 
     return false;
   }
