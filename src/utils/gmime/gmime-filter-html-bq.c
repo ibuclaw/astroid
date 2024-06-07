@@ -81,7 +81,7 @@ static struct {
 
 #define NUM_URL_PATTERNS (sizeof (patterns) / sizeof (patterns[0]))
 
-static void g_mime_filter_html_bq_class_init (GMimeFilterHTMLBQClass *klass);
+static void g_mime_filter_html_bq_class_init (GMimeFilterHTMLBQClass *klass, gpointer);
 static void g_mime_filter_html_bq_init (GMimeFilterHTMLBQ *filter, GMimeFilterHTMLBQClass *klass);
 static void g_mime_filter_html_bq_finalize (GObject *object);
 
@@ -123,7 +123,7 @@ g_mime_filter_html_bq_get_type (void)
 
 
 static void
-g_mime_filter_html_bq_class_init (GMimeFilterHTMLBQClass *klass)
+g_mime_filter_html_bq_class_init (GMimeFilterHTMLBQClass *klass, gpointer /* data */)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 	GMimeFilterClass *filter_class = GMIME_FILTER_CLASS (klass);

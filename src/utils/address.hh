@@ -57,6 +57,7 @@ namespace Astroid {
       AddressList (ustring);
       AddressList (InternetAddressList *);
       AddressList (Address);
+      AddressList (const AddressList &);
 
       std::vector<Address> addresses;
       ustring str ();

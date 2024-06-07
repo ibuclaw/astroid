@@ -162,6 +162,11 @@ namespace Astroid {
     addresses.push_back (a);
   }
 
+  AddressList::AddressList (const AddressList &al)
+    : addresses(al.addresses) {
+
+  }
+
   ustring AddressList::str () {
     InternetAddressList * list = internet_address_list_new ();
     for (Address &a : addresses) {

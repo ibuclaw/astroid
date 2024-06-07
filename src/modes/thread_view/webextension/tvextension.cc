@@ -50,7 +50,7 @@ extern "C" {/*{{{*/
 
 static void
 web_page_document_loaded_callback (WebKitWebPage *web_page,
-                                   gpointer       user_data)
+                                   gpointer /* user_data */)
 {
   WebKitFrame *frame = webkit_web_page_get_main_frame (web_page);
   JSCContext *jsc_context = webkit_frame_get_js_context (frame);
@@ -1578,7 +1578,7 @@ void AstroidExtension::insert_header_address_list (
   WebKitDOMHTMLElement * name;
   WebKitDOMHTMLElement * email;
 
-  for (const AstroidMessages::Address address : addresses.addresses()) {
+  for (const AstroidMessages::Address &address : addresses.addresses()) {
     if (address.full_address().size() > 0) {
       li_node = WEBKIT_DOM_NODE (DomUtils::clone_node (tpl));
       a = DomUtils::select (li_node, "a");
