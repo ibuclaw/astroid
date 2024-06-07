@@ -152,7 +152,9 @@ namespace Astroid {
                       run(),
                   vm );
     } catch (po::unknown_option &ex) {
-      LOG (error) << "unknown option" << endl;
+      LOG (error) << ex.what() << endl;
+      show_help = true;
+    } catch (po::invalid_command_line_syntax &ex) {
       LOG (error) << ex.what() << endl;
       show_help = true;
     }
@@ -423,7 +425,9 @@ namespace Astroid {
                         run(),
                     vm );
       } catch (po::unknown_option &ex) {
-        LOG (error) << "unknown option" << endl;
+        LOG (error) << ex.what() << endl;
+        return 1;
+      } catch (po::invalid_command_line_syntax &ex) {
         LOG (error) << ex.what() << endl;
         return 1;
       }
