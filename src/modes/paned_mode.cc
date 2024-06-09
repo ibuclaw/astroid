@@ -23,8 +23,9 @@ namespace Astroid {
     paned->show_all ();
 
     keys.title = "Paned mode";
-    keys.register_key (Key (false, true, (guint) GDK_KEY_space), "pane.swap_focus",
-        "Swap focus to other pane if open",
+    keys.register_key (Key (false, true, (guint) GDK_KEY_Page_Down),
+	{ Key(false, true, (guint) GDK_KEY_Page_Up) },
+	"pane.swap_focus", "Swap focus to other pane if open",
         [&] (Key) {
           if (packed == 2) {
             release_modal ();
