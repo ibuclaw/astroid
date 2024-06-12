@@ -7,20 +7,19 @@
 # include <gtkmm/liststore.h>
 # include <gtkmm/scrolledwindow.h>
 
-# include "modes/paned_mode.hh"
 # include "query_loader.hh"
 # include "modes/thread_view/thread_view.hh"
 
 namespace Astroid {
 
-  class ThreadIndex : public PanedMode  {
+  class ThreadIndex : public Mode {
     public:
       ThreadIndex (MainWindow *, ustring, ustring = "");
       ~ThreadIndex ();
 
       QueryLoader queryloader;
 
-      void open_thread (refptr<NotmuchThread>, bool new_tab, bool new_window = false);
+      void open_thread (refptr<NotmuchThread>, bool new_window);
 
       Glib::RefPtr<ThreadIndexListStore> list_store;
       ThreadIndexListView * list_view;
@@ -35,6 +34,9 @@ namespace Astroid {
       void on_stats_ready ();
 
       bool on_index_action (ThreadView * tv, ThreadView::IndexAction);
+
+      virtual void grab_modal () override;
+      virtual void release_modal () override;
 
     private:
       void on_first_thread_ready ();

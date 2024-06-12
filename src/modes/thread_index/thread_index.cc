@@ -9,7 +9,6 @@
 
 # include "astroid.hh"
 # include "db.hh"
-# include "modes/paned_mode.hh"
 # include "thread_index.hh"
 # include "thread_index_list_view.hh"
 # include "thread_index_list_cell_renderer.hh"
@@ -20,7 +19,7 @@
 using namespace std;
 
 namespace Astroid {
-  ThreadIndex::ThreadIndex (MainWindow *mw, ustring _query, ustring _name) : PanedMode(mw), query_string(_query) {
+  ThreadIndex::ThreadIndex (MainWindow *mw, ustring _query, ustring _name) : Mode(mw), query_string(_query) {
 
     name = _name;
     set_orientation (Gtk::Orientation::ORIENTATION_VERTICAL);
@@ -35,9 +34,7 @@ namespace Astroid {
     scroll     = Gtk::manage(new ThreadIndexScrolled (main_window, list_store, list_view));
 
     list_view->set_sort_type (queryloader.sort);
-
-    add_pane (0, scroll);
-
+    pack_start (*scroll, true, true, 0);
     show_all ();
 
     /* load threads */
@@ -53,19 +50,6 @@ namespace Astroid {
 
     /* register keys {{{ */
     keys.set_prefix ("Thread Index", "thread_index");
-
-    keys.register_key ("C-w", "thread_index.close_pane", "Close thread view pane if open",
-        [&](Key) {
-          if (packed == 2) {
-            /* close thread view */
-            del_pane (1);
-
-            return true;
-          }
-
-          return false;
-        });
-
 
     keys.register_key (Key((guint) GDK_KEY_dollar), "thread_index.refresh", "Refresh query",
         [&] (Key) {
@@ -215,38 +199,22 @@ namespace Astroid {
           queryloader.unread_messages, queryloader.total_messages, queryloader.loading() ? " (%)" : "", f);
   }
 
-  void ThreadIndex::open_thread (refptr<NotmuchThread> thread, bool new_tab, bool new_window) {
-    LOG (debug) << "ti: open thread: " << thread->thread_id << " (" << new_tab << ")";
+  void ThreadIndex::open_thread (refptr<NotmuchThread> thread, bool new_window) {
+    LOG (debug) << "ti: open thread: " << thread->thread_id << " (" << new_window << ")";
     ThreadView * tv;
-
-    new_tab = new_tab & !new_window; // only open new tab if not opening new window
 
     if (new_window) {
       MainWindow * nmw = astroid->open_new_window (false);
       tv = Gtk::manage(new ThreadView (nmw));
       nmw->add_mode (tv);
-    } else if (new_tab) {
+    } else {
       tv = Gtk::manage(new ThreadView (main_window));
       main_window->add_mode (tv);
-    } else {
-      LOG (debug) << "ti: init paned tv";
-      if (packed == 2) {
-        tv = (ThreadView *) pw2;
-      } else {
-        tv = Gtk::manage(new ThreadView (main_window));
-        add_pane (1, tv);
-      }
     }
 
     tv->load_thread (thread);
     tv->show ();
     tv->signal_index_action ().connect (sigc::mem_fun (this, &ThreadIndex::on_index_action));
-
-    // grab modal
-    if (!new_tab && !new_window) {
-      current = 1;
-      grab_modal ();
-    }
   }
 
   bool ThreadIndex::on_index_action (ThreadView * tv, ThreadView::IndexAction action) {
@@ -305,7 +273,16 @@ namespace Astroid {
 
   void ThreadIndex::pre_close () {
     queryloader.stop (true);
-    if (packed > 1) del_pane (1);
+  }
+
+  void ThreadIndex::grab_modal () {
+    //LOG (debug) << "ti: grab modal to: " << current;
+    scroll->grab_modal ();
+  }
+
+  void ThreadIndex::release_modal () {
+    //LOG (debug) << "ti: release modal: " << current;
+    scroll->release_modal ();
   }
 
   ThreadIndex::~ThreadIndex () {

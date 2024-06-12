@@ -256,7 +256,6 @@ add_library(
   src/modes/keybindings.cc
   src/modes/log_view.cc
   src/modes/mode.cc
-  src/modes/paned_mode.cc
   src/modes/raw_message.cc
   src/modes/reply_message.cc
   src/modes/saved_searches.cc

@@ -4,7 +4,6 @@
 # include <functional>
 
 # include "db.hh"
-# include "modes/paned_mode.hh"
 # include "main_window.hh"
 # include "thread_index.hh"
 # include "query_loader.hh"
@@ -625,20 +624,6 @@ namespace Astroid {
           auto thread = get_current_thread ();
 
           if (thread)
-            thread_index->open_thread (thread, true);
-
-          return true;
-        });
-
-    keys->register_key (Key (false, true, (guint) GDK_KEY_Return),
-        { Key (false, true, (guint) GDK_KEY_KP_Enter) },
-        "thread_index.open_paned",
-        "Open thread in pane",
-        [&] (Key) {
-          /* open message in split pane (if so configured) */
-          auto thread = get_current_thread ();
-
-          if (thread)
             thread_index->open_thread (thread, false);
 
           return true;
@@ -653,7 +638,7 @@ namespace Astroid {
           auto thread = get_current_thread ();
 
           if (thread)
-            thread_index->open_thread (thread, false, true);
+            thread_index->open_thread (thread, true);
 
           return true;
         });
@@ -1231,7 +1216,7 @@ namespace Astroid {
           if (thread) {
             LOG (info) << "ti_list: loading: " << thread->thread_id;
 
-            thread_index->open_thread (thread, true);
+            thread_index->open_thread (thread, false);
           }
         }
         break;
@@ -1241,7 +1226,7 @@ namespace Astroid {
           if (thread) {
             LOG (info) << "ti_list: loading: " << thread->thread_id;
 
-            thread_index->open_thread (thread, true, true);
+            thread_index->open_thread (thread, true);
           }
         }
         break;
@@ -1258,7 +1243,7 @@ namespace Astroid {
       LOG (info) << "ti_list: loading: " << thread->thread_id;
 
       /* open message in new tab  */
-      thread_index->open_thread (thread, true);
+      thread_index->open_thread (thread, false);
     }
   }
 
