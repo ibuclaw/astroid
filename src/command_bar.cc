@@ -456,9 +456,6 @@ namespace Astroid {
   /********************
    * Tag Completion
    ********************/
-  bool      CommandBar::TagCompletion::canvas_color_set = false;
-  Gdk::RGBA CommandBar::TagCompletion::canvas_color;
-
   CommandBar::TagCompletion::TagCompletion ()
   {
     completion_model = Gtk::ListStore::create (m_columns);
@@ -601,11 +598,6 @@ namespace Astroid {
     Gtk::Entry * entry = get_entry ();
     if (entry == NULL) return;
 
-    if (!canvas_color_set) {
-      canvas_color     = entry->get_style_context()->get_background_color ();
-      canvas_color_set = true;
-    }
-
     ustring txt = entry->get_text ();
 
     /* set up attrlist */
@@ -644,11 +636,7 @@ namespace Astroid {
   void CommandBar::TagCompletion::color_tag (ustring tag,
     ustring_sz gstart, Pango::AttrList &attrs, EditMode edit_mode) {
 
-    unsigned char cv[3] = { (unsigned char) (canvas_color.get_red_u ()   * 255 / 65535),
-                            (unsigned char) (canvas_color.get_green_u () * 255 / 65535),
-                            (unsigned char) (canvas_color.get_blue_u ()  * 255 / 65535) };
-
-    auto colors = Utils::get_tag_color_rgba (tag, cv);
+    auto colors = Utils::get_tag_color_rgba (tag);
 
     auto fg = colors.first;
     auto bg = colors.second;
@@ -812,11 +800,6 @@ namespace Astroid {
   void CommandBar::SearchCompletion::color_tags (EditMode edit_mode) {
     Gtk::Entry * entry = get_entry ();
     if (entry == NULL) return;
-
-    if (!canvas_color_set) {
-      canvas_color     = entry->get_style_context()->get_background_color ();
-      canvas_color_set = true;
-    }
 
     ustring txt = entry->get_text ();
 

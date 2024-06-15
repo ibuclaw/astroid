@@ -103,7 +103,7 @@ namespace Astroid {
     return str.str ();
   }
 
-  std::pair<Gdk::RGBA, Gdk::RGBA> Utils::get_tag_color_rgba (ustring t, unsigned char cv[3])
+  std::pair<Gdk::RGBA, Gdk::RGBA> Utils::get_tag_color_rgba (ustring t)
   {
     auto     _tc = Crypto::get_md5_digest_b (t);
     gsize    len;
@@ -139,9 +139,12 @@ namespace Astroid {
                     bg[2] * (65535) / (255),
                     (unsigned short) (tags_alpha * (65535)));
 
-    float lum = ((bg[0] * tags_alpha + (1-tags_alpha) * cv[0] ) * .2126 + (bg[1] * tags_alpha + (1-tags_alpha) * cv[1]) * .7152 + (bg[2] * tags_alpha + (1-tags_alpha) * cv[0]) * .0722) / 255.0;
-    /* float avg = (bg[0] + bg[1] + bg[2]) / (3 * 255.0); */
+    // Assume white background
+    guint8 canvascolor = 0xff;
 
+    float lum = ((bg[0] * tags_alpha + (1-tags_alpha) * canvascolor) * .2126
+                 + (bg[1] * tags_alpha + (1-tags_alpha) * canvascolor) * .7152
+                 + (bg[2] * tags_alpha + (1-tags_alpha) * canvascolor) * .0722) / 255.0;
 
     Gdk::RGBA fc;
     if (lum > 0.5) {
@@ -153,8 +156,8 @@ namespace Astroid {
     return std::make_pair (fc, bc);
   }
 
-  std::pair<ustring, ustring> Utils::get_tag_color (ustring t, guint8 cv[3]) {
-    auto clrs = get_tag_color_rgba (t, cv);
+  std::pair<ustring, ustring> Utils::get_tag_color (ustring t) {
+    auto clrs = get_tag_color_rgba (t);
 
     return std::make_pair (rgba_to_hex (clrs.first), rgba_to_hex (clrs.second));
   }

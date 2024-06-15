@@ -403,8 +403,6 @@ namespace Astroid {
 
     /* tags */
     {
-      unsigned char cv[] = { 0xff, 0xff, 0xff };
-
       ustring tags_s;
 
       vector<ustring> tags = m->tags;
@@ -412,7 +410,7 @@ namespace Astroid {
         tag = Glib::Markup::escape_text (tag);
       }
 
-      tags_s = VectorUtils::concat_tags_color (tags, false, 0, cv);
+      tags_s = VectorUtils::concat_tags_color (tags, false, 0);
 
       msg.set_tag_string (tags_s);
 

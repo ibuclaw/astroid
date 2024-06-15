@@ -64,8 +64,7 @@ namespace Astroid {
   ustring VectorUtils::concat_tags_color (
       vector<ustring> tags,
       bool pango,
-      int maxlen,
-      unsigned char canvascolor[3]
+      int maxlen
       ) {
 
     ustring tag_string = "";
@@ -83,7 +82,7 @@ namespace Astroid {
         }
       } else first = false;
 
-      auto colors = Utils::get_tag_color (t, canvascolor);
+      auto colors = Utils::get_tag_color (t);
 
       if (maxlen > 0) {
         broken = true;

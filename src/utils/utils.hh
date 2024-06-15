@@ -27,8 +27,8 @@ namespace Astroid {
       static bfs::path expand (bfs::path);
 
       /* get tag color */
-      static std::pair<Gdk::RGBA, Gdk::RGBA> get_tag_color_rgba (ustring, guint8 canvascolor[3]);
-      static std::pair<ustring, ustring> get_tag_color (ustring, guint8 canvascolor[3]);
+      static std::pair<Gdk::RGBA, Gdk::RGBA> get_tag_color_rgba (ustring);
+      static std::pair<ustring, ustring> get_tag_color (ustring);
       static ustring      rgba_to_hex (Gdk::RGBA);
       static float        tags_alpha;
       static Pango::Color tags_upper_color;

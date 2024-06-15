@@ -343,20 +343,12 @@ namespace Astroid {
 
     ustring tag_string;
 
-    Gdk::Color bg;
-
     if ((flags & Gtk::CELL_RENDERER_SELECTED) != 0) {
-      bg = Gdk::Color (background_color_selected);
+      Gdk::Color bg = Gdk::Color (background_color_selected);
       cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
-    } else {
-      bg.set_grey_p (1.);
     }
 
-    unsigned char cv[3] = { (unsigned char) bg.get_red (),
-                            (unsigned char) bg.get_green (),
-                            (unsigned char) bg.get_blue () };
-
-    tag_string = VectorUtils::concat_tags_color (tags, true, tags_len, cv);
+    tag_string = VectorUtils::concat_tags_color (tags, true, tags_len);
 
     pango_layout->set_markup (tag_string);
 
