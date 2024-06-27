@@ -120,22 +120,11 @@ namespace Astroid {
 
     render_subject (cr, widget, cell_area, flags);
 
-    /*
-    if (!last)
-      render_delimiter (cr, widget, cell_area);
-    */
-
     if (thread->flagged && show_left_icons)
       render_flagged (cr, widget, cell_area);
 
     if (thread->attachment && show_left_icons)
       render_attachment (cr, widget, cell_area);
-
-    /*
-    if (marked)
-      render_marked (cr, widget, cell_area);
-    */
-
   }
 
   ThreadIndexListCellRenderer::~ThreadIndexListCellRenderer () {
@@ -184,33 +173,6 @@ namespace Astroid {
   } // }}}
 
   /* render icons {{{ */
-  void ThreadIndexListCellRenderer::render_marked (
-      const ::Cairo::RefPtr< ::Cairo::Context>&cr,
-      Gtk::Widget & /* widget */,
-      const Gdk::Rectangle &cell_area ) {
-
-
-    if (!marked_icon) {
-      Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::get_default();
-      Glib::RefPtr<Gdk::Pixbuf> pixbuf = theme->load_icon (
-          "object-select-symbolic",
-          left_icons_size,
-          Gtk::ICON_LOOKUP_USE_BUILTIN  | Gtk::ICON_LOOKUP_FORCE_SIZE);
-
-
-      marked_icon = pixbuf->scale_simple (left_icons_size, left_icons_size,
-          Gdk::INTERP_BILINEAR);
-    }
-
-    int y = cell_area.get_y() + left_icons_padding + line_spacing / 2;
-    int x = cell_area.get_x();
-
-    Gdk::Cairo::set_source_pixbuf (cr, marked_icon, x, y);
-
-    cr->rectangle (x, y, left_icons_size, left_icons_size);
-    cr->fill ();
-  }
-
   void ThreadIndexListCellRenderer::render_flagged (
       const ::Cairo::RefPtr< ::Cairo::Context>&cr,
       Gtk::Widget & /* widget */,
@@ -263,22 +225,6 @@ namespace Astroid {
 
     cr->rectangle (x, y, left_icons_size, left_icons_size);
     cr->fill ();
-  } // }}}
-
-  void ThreadIndexListCellRenderer::render_delimiter ( // {{{
-      const ::Cairo::RefPtr< ::Cairo::Context>&cr,
-      Gtk::Widget & /*widget */,
-      const Gdk::Rectangle &cell_area ) {
-
-    cr->set_line_width(0.5);
-    Gdk::Color gray;
-    gray.set_grey_p (0.1);
-    cr->set_source_rgb (gray.get_red_p(), gray.get_green_p(), gray.get_blue_p());
-
-    cr->move_to(cell_area.get_x(), cell_area.get_y() + cell_area.get_height());
-    cr->line_to(cell_area.get_x() + cell_area.get_width(), cell_area.get_y() + cell_area.get_height());
-    cr->stroke ();
-
   } // }}}
 
   void ThreadIndexListCellRenderer::render_subject ( // {{{

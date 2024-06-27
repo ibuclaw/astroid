@@ -17,7 +17,6 @@ namespace Astroid {
       ThreadIndex * thread_index;
 
       Glib::RefPtr<NotmuchThread> thread; /* thread that should be rendered now */
-      bool last;
       bool marked;
 
       /* these tags are displayed otherwisely (or ignored by the user), so they
@@ -161,10 +160,6 @@ namespace Astroid {
           const Gdk::Rectangle &cell_area );
 
       refptr<Gdk::Pixbuf> marked_icon;
-      void render_marked (
-          const ::Cairo::RefPtr< ::Cairo::Context>&cr,
-          Gtk::Widget &widget,
-          const Gdk::Rectangle &cell_area );
   };
 }
 
