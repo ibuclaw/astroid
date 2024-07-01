@@ -1,78 +1,31 @@
 /* ui-version: 5 (do not change when modifying theme for yourself) */
 /* Variables */
-@if not(global-variable-exists(background-color)) {
-  $background-color: #ccc !global;
-}
+$background-color: #ccc !default;
 
 /* Background colors associated with received emails: */
-@if not(global-variable-exists(recv-normal)) {
-  $recv-normal: #ffffff !global;
-}
-@if not(global-variable-exists(recv-quoted)) {
-  $recv-quoted: #e8e8e8 !global;
-}
-@if not(global-variable-exists(recv-collapsed)) {
-  $recv-collapsed: #f5f5f5 !global;
-}
+$recv-normal: #ffffff !default;
+$recv-quoted: #e8e8e8 !default;
+$recv-collapsed: #f5f5f5 !default;
 
 /* Background colors associated with sent emails: */
-@if not(global-variable-exists(sent-normal)) {
-  $sent-normal: #ffffff !global;
-}
-
-@if not(global-variable-exists(sent-quoted)) {
-  $sent-quoted: #e8e8e8 !global;
-}
-
-@if not(global-variable-exists(sent-collapsed)) {
-  $sent-collapsed: #f5f5f5 !global;
-}
+$sent-normal: #ffffff !default;
+$sent-quoted: #e8e8e8 !default;
+$sent-collapsed: #f5f5f5 !default;
 
 /* Fonts */
-@if not(global-variable-exists(font-base-size)) {
-  $font-base-size: 16px !global;
-}
-
-@if not(global-variable-exists(font-mono)) {
-  $font-mono: monospace !global;
-}
-
-@if not(global-variable-exists(font-sans)) {
-  $font-sans: sans-serif !global;
-}
-
-@if not(global-variable-exists(font-family-default)) {
-  $font-family-default: $font-sans !global;
-}
+$font-base-size: 16px !default;
+$font-mono: monospace !default;
+$font-sans: sans-serif !default;
+$font-family-default: $font-sans !default;
 
 /* Colours */
-@if not(global-variable-exists(email-solid)) {
-  $email-solid: #d8d8d8 !global;
-}
-
-@if not(global-variable-exists(focused-solid)) {
-  $focused-solid: #4a90d9 !global;
-}
-
-@if not(global-variable-exists(sibling-color)) {
-  $sibling-color: lighten( $focused-solid, 20%) !global;
-}
-
-@if not(global-variable-exists(attachment-color)) {
-  $attachment-color:  $sibling-color !global;
-}
-
-@if not(global-variable-exists(mime-color)) {
-  $mime-color: lighten( #FFFF00, 15%) !global;
-}
-
-@if not(global-variable-exists(encrypted)) {
-  $encrypted: #99cc66 !global;
-}
-
-@if not(global-variable-exists(signed)) {
-  $signed: #cccc66 !global;
-}
+$email-solid: #d8d8d8 !default;
+$focused-solid: #4a90d9 !default;
+$sibling-color: lighten( $focused-solid, 20%) !default;
+$attachment-color:  $sibling-color !default;
+$mime-color: lighten( #FFFF00, 15%) !default;
+$encrypted: #99cc66 !default;
+$signed: #cccc66 !default;
 
 @media print {
 
