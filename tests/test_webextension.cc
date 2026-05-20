@@ -7,7 +7,6 @@
 
 # include "test_common.hh"
 
-# include "modes/thread_view/theme.hh"
 # include "utils/ustring_utils.hh"
 
 namespace bfs = boost::filesystem;
@@ -131,7 +130,7 @@ public:
             g_object_ref_sink (webview);
 
         webkit_web_view_load_html (webview,
-                                   Astroid::Theme ().thread_view_html.c_str (),
+                                   "<html><head></head><body>WebExtension</body></html>",
                                    Astroid::UstringUtils::random_alphanumeric (30).c_str ());
     }
 
